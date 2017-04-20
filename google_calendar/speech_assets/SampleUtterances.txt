@@ -1,0 +1,16 @@
+ReadGoogleCalendarIntent start calendar
+ReadGoogleCalendarIntent read all calendar
+ReadGoogleCalendarIntent read the calendar
+
+ReadSpecificDayIntent read reminders for {day}
+ReadSpecificDayIntent reminders for {day}
+ReadSpecificDayIntent reminders {day}
+ReadSpecificDayIntent {day}
+
+AMAZON.StopIntent no
+AMAZON.StopIntent close
+AMAZON.StopIntent nope
+AMAZON.StopIntent no thanks
+AMAZON.StopIntent no thank you
+
+AMAZON.CancelIntent stop
