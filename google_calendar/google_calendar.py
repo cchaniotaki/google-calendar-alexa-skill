@@ -31,36 +31,33 @@ def get_reminders():
     response = request.get(url)
     data = response.json()
     now = str(datetime.datetime.now())
-    for i in range(0, len(data["items"])):
-        try:
-            reminder_start = data["items"][i]["start"]["dateTime"]
-            date_start = reminder_start[0:10]
-            date_time = date_start + " " + reminder_start[11:16]
-            if now > date_time:
-                continue
-            year_start = reminder_start[0:4]
-            month_start = calendar.month_name[int(reminder_start[5:7])]
-            day_start = reminder_start[8:10]
-            day_number = weekday(int(year_start), int(reminder_start[5:7]),
-                                 int(day_start))
-            day_name_start = day_name[day_number]
-            time_start = change_time(reminder_start[11:16])
-            reminder_end = data["items"][i]["end"]["dateTime"]
-            date_end = reminder_end[0:10]
-            year_end = reminder_end[0:4]
-            month_end = calendar.month_name[int(reminder_end[5:7])]
-            day_end = reminder_end[8:10]
-            day_number = weekday(int(year_end), int(reminder_end[5:7]),
-                                 int(day_end))
-            day_name_end = calendar.day_name[day_number]
-            time_end = change_time(reminder_end[11:16])
-            reminder = [data["items"][i]["summary"], date_start,
-                        day_name_start, day_start, month_start, year_start,
-                        time_start, date_end, day_name_end, day_end, month_end,
-                        year_end, time_end]
-            reminders_list.append(reminder)
-        except KeyError:
-            pass
+    for i in data["items"]:
+        reminder_start = i["start"]["dateTime"]
+        date_start = reminder_start[0:10]
+        date_time = date_start + " " + reminder_start[11:16]
+        if now > date_time:
+            continue
+        year_start = reminder_start[0:4]
+        month_start = calendar.month_name[int(reminder_start[5:7])]
+        day_start = reminder_start[8:10]
+        day_number = weekday(int(year_start), int(reminder_start[5:7]),
+                             int(day_start))
+        day_name_start = day_name[day_number]
+        time_start = change_time(reminder_start[11:16])
+        reminder_end = i["end"]["dateTime"]
+        date_end = reminder_end[0:10]
+        year_end = reminder_end[0:4]
+        month_end = calendar.month_name[int(reminder_end[5:7])]
+        day_end = reminder_end[8:10]
+        day_number = weekday(int(year_end), int(reminder_end[5:7]),
+                             int(day_end))
+        day_name_end = calendar.day_name[day_number]
+        time_end = change_time(reminder_end[11:16])
+        reminder = [i["summary"], date_start,
+                    day_name_start, day_start, month_start, year_start,
+                    time_start, date_end, day_name_end, day_end, month_end,
+                    year_end, time_end]
+        reminders_list.append(reminder)
     # sort by time
     reminders_list.sort(key=lambda reminder: reminder[6])
     # sort by date
@@ -146,61 +143,3 @@ def specific_day(get_day, reminders_list):
 
 reminders = get_reminders()
 reminders = classify_days(reminders)
-
-
-@ask.launch
-def launch():
-    """
-    Starts the skill.
-    """
-    speech_text = 'Welcome to Google Calendar. ' + \
-                  'You can ask me to read all calendar or read reminders ' + \
-                  'for a specific day'
-    reprompt = "You can ask me to read all calendar or read reminders for " + \
-               "a specific day. For example say 'reminders for today' or " + \
-               "'reminders for Monday 24'."
-    return question(speech_text).reprompt(reprompt)
-
-
-@ask.intent('ReadGoogleCalendarIntent')
-def read_google_calendar():
-    """
-    Alexa reads all reminders from Google Calendar
-    """
-    speech = all_calendar(reminders)
-    speech += 'End of calendar... Goodbye.'
-    return statement(speech)
-
-
-@ask.intent('ReadSpecificDayIntent', convert={'day': 'date'})
-def read_specific_day(day):
-    """
-    Alexa reads reminders for a specific day from Google Calendar
-    """
-    speech = specific_day(str(day), reminders)
-    speech += "You can ask me for other day."
-    return question(speech).reprompt("You can ask me for other day.")
-
-
-@ask.intent('AMAZON.StopIntent')
-def stop():
-    return statement("Goodbye")
-
-
-@ask.intent('AMAZON.CancelIntent')
-def cancel():
-    return statement("Goodbye")
-
-
-@ask.session_ended
-def session_ended():
-    return "{}", 200
-
-
-def _infodump(obj, indent=2):
-    msg = json.dumps(obj, indent=indent)
-    logger.info(msg)
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
