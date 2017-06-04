@@ -43,7 +43,7 @@ def get_reminders():
         day_number = weekday(int(year_start), int(reminder_start[5:7]),
                              int(day_start))
         day_name_start = day_name[day_number]
-        time_start = change_time(reminder_start[11:16])
+        time_start = reminder_start[11:16]
         reminder_end = item["end"]["dateTime"]
         date_end = reminder_end[0:10]
         year_end = reminder_end[0:4]
@@ -59,10 +59,12 @@ def get_reminders():
                     year_end, time_end]
         reminders_list.append(reminder)
     # sort by time
-    reminders_list.sort(key=lambda reminder: reminder[6])
+    reminders_list.sort(key=lambda reminders_list: reminders_list[6])
     # sort by date
-    reminders_list.sort(key=lambda reminder: datetime.datetime.strptime(
-        reminder[1], '%Y-%m-%d'))
+    reminders_list.sort(key=lambda reminders_list: datetime.datetime.strptime(
+        reminders_list[1], '%Y-%m-%d'))
+    for i in range(len(reminders_list)):
+        reminders_list[i][6] = change_time(reminders_list[i][6])
     return reminders_list
 
 
@@ -138,11 +140,9 @@ def specific_day(get_day, reminders_list):
                               reminder[7] + " at " + reminder[-1] + ". "
     if len(speech) == 0:
         speech = "You don't have reminders for the day."
+    if len(get_day) == 0 and len(speech) == 0:
+        speech = "Please say the day again."
     return speech
-
-
-reminders = get_reminders()
-reminders = classify_days(reminders)
 
 
 @ask.launch
@@ -165,6 +165,9 @@ def read_google_calendar():
     """
     Alexa reads all reminders from Google Calendar
     """
+    reminders = get_reminders()
+    reminders = classify_days(reminders)
+    print(reminders)
     speech = all_calendar(reminders)
     speech += 'End of calendar... Goodbye.'
     return statement(speech)
@@ -175,18 +178,18 @@ def read_specific_day(day):
     """
     Alexa reads reminders for a specific day from Google Calendar
     """
+    reminders = get_reminders()
+    reminders = classify_days(reminders)
+    print(reminders)
+    _infodump(day)
     speech = specific_day(str(day), reminders)
-    speech += "You can ask me for other day."
+    if speech != "Please say the day again.":
+        speech += " You can ask me for other day."
     return question(speech).reprompt("You can ask me for other day.")
 
 
 @ask.intent('AMAZON.StopIntent')
 def stop():
-    return statement("Goodbye")
-
-
-@ask.intent('AMAZON.CancelIntent')
-def cancel():
     return statement("Goodbye")
 
 
