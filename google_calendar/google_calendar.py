@@ -5,13 +5,13 @@ Google Calendar Alexa Skill:
     Sort and group the reminders for each day.
     Alexa reads the sorted list.
 """
-import requests
-import logging
-import datetime
 import calendar
+import datetime
+import logging
+import requests
+from calendar import weekday, day_name
 from flask import Flask, json
 from flask_ask import Ask, question, statement, logger
-from calendar import weekday, day_name
 
 app = Flask(__name__)
 ask = Ask(app, "/")
@@ -107,6 +107,10 @@ def classify_days(reminders_list):
 
 
 def all_calendar(reminders_list):
+    """
+    All the calendar reminders speech
+    :return: Text with reminders from Google Calendar.
+    """
     speech = ""
     for day, reminders in reminders_list.items():
         speech += "Day " + day + ", "
@@ -124,6 +128,12 @@ def all_calendar(reminders_list):
 
 
 def specific_day(get_day, reminders_list):
+    """
+    Reminders for a specific day
+    :param get_day: the day that the user want to listen reminders
+    :param reminders_list: Sorted list with reminders from calendar
+    :return: Text with reminders from Google Calendar for the day
+    """
     speech = ""
     for day, reminders in reminders_list.items():
         if reminders[0][1] == get_day:
@@ -167,7 +177,7 @@ def read_google_calendar():
     """
     reminders = get_reminders()
     reminders = classify_days(reminders)
-    print(reminders)
+    _infodump(reminders)
     speech = all_calendar(reminders)
     speech += 'End of calendar... Goodbye.'
     return statement(speech)
@@ -180,8 +190,8 @@ def read_specific_day(day):
     """
     reminders = get_reminders()
     reminders = classify_days(reminders)
-    print(reminders)
-    _infodump(day)
+    #_infodump(reminders)
+    #_infodump(day)
     speech = specific_day(str(day), reminders)
     if speech != "Please say the day again.":
         speech += " You can ask me for other day."
@@ -190,6 +200,9 @@ def read_specific_day(day):
 
 @ask.intent('AMAZON.StopIntent')
 def stop():
+    """
+    Alexa stops the skill
+    """
     return statement("Goodbye")
 
 
