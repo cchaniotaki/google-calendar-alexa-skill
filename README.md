@@ -5,7 +5,7 @@ With this skill you can connect your **Public Google Calendar** with your Alexa 
 Alexa reads reminder with the following formatting:
 ```
 Day Month Year:
-Reminder for start time to end time
+Reminder for start_time to end_time
 ….
 ```
 It can also do **auto refresh** when you call the skill again and takes your new reminders.
